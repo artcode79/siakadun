@@ -2,7 +2,7 @@
 'use client'
 import React, { useState } from 'react'
 import { db } from '~/libs/firebase'
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, getDocs, setDoc } from 'firebase/firestore'
 import {
 	Button,
 	Box,
@@ -25,9 +25,52 @@ const Add = () => {
 	const [nim, setNim] = useState('')
 	const [nama, setNama] = useState('')
 	const [alamat, setAlamat] = useState('')
-	const [jurusan, setJurusan] = useState('')
+	const [desa, setDesa] = useState('')
+	const [kecamaset, setKecamatan] = useState('')
+	const [kabupaten, setKabupaten] = useState('')
+	const [provinsi, setProvinsi] = useState('')
+	const [sma, setSma] = useState('')
+	const [no_ijazah, setNo_ijazah] = useState('')
+	const [no_skhun, setNo_skhun] = useState('')
+	const [no_sertifikat, setNo_sertifikat] = useState('')
+	const [akta_kelahiran, setAkta_kelahiran] = useState('')
+	const [ktp, setKtp] = useState('')
+	const [fakultas_id, setFakultas_id] = useState('')
+	const [jurusan_id, setJurusan_id] = useState('')
 	const [email, setEmail] = useState('')
 	const [no_hp, setNo_hp] = useState('')
+	const [foto, setFoto] = useState('')
+	const [foto_ktp, setFoto_ktp] = useState('')
+	const [foto_akta_kelahiran, setFoto_akta_kelahiran] = useState('')
+	const [mahasiswa_id, setMahasiswa_id] = useState('')
+	const [error, setError] = useState(false)
+	const [jurusans, setJurusans] = useState<any[]>([])
+
+	const getJurusans = async () => {
+		const jurusanRef = collection(db, 'jurusan')
+		const querySnapshot = await getDocs(jurusanRef)
+		const jurusans: any[] = []
+		querySnapshot.forEach(doc => {
+			jurusans.push({
+				id: doc.id,
+				nama: doc.data().nama,
+			})
+		})
+		setJurusans(jurusans)
+	}
+	const getFakultas = async () => {
+		const fakultasRef = collection(db, 'fakultas')
+		const querySnapshot = await getDocs(fakultasRef)
+		const fakultas: any[] = []
+		querySnapshot.forEach(doc => {
+			fakultas.push({
+				id: doc.id,
+				nama: doc.data().nama,
+			})
+		})
+		setJurusans(fakultas)
+	}
+	 
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -35,7 +78,7 @@ const Add = () => {
 			nim: '21' + Math.random() + 10000,
 			nama: nama,
 			alamat: alamat,
-			jurusan: jurusan,
+			jurusan: jurusans,
 			email: email,
 			no_hp: no_hp,
 		})
@@ -43,7 +86,7 @@ const Add = () => {
 		await setDoc(doc(db, 'mahasiswa', docRef.id), {
 			nama: nama,
 			alamat: alamat,
-			jurusan: jurusan,
+			jurusan: jurusans,
 			email: email,
 			no_hp: no_hp,
 		})
@@ -80,26 +123,6 @@ const Add = () => {
 								required
 								sx={{ mb: 2 }}
 							/>
-
-							<FormControl variant="outlined" sx={{ mb: 2 }}>
-								<InputLabel id="jurusan">Jurusan</InputLabel>
-								<Select
-									labelId="jurusan"
-									id="jurusan"
-									value={jurusan}
-									variant="outlined"
-									size="medium"
-									label="Jurusan"
-									onChange={e => setJurusan(e.target.value)}
-									required
-									sx={{ mb: 2 }}
-								>
-									<MenuItem value={'FIA'}>Fakultas Ilmu Administrasi</MenuItem>
-									<MenuItem value={'FT'}>Fakultas Teknik</MenuItem>
-									<MenuItem value={'FH'}>Fakultas Hukum</MenuItem>
-									<MenuItem value={'FIS'}>Fakultas Ilmu Sosial</MenuItem>
-								</Select>
-							</FormControl>
 
 							<TextField
 								id="email"
