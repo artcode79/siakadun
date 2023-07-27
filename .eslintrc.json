@@ -1,3 +1,43 @@
 {
-  "extends": "next/core-web-vitals"
+	"extends": "next/core-web-vitals",
+
+	"rules": {
+		"react/react-in-jsx-scope": "option",
+		"react/prop-types": "off",
+		"react/jsx-props-no-spreading": "off"
+		// Additional, per-project rules...
+	},
+	"overrides": [
+		{
+			"files": ["*.ts", "*.tsx"],
+			"rules": {
+				// TypeScript's `noFallthroughCasesInSwitch` option is more robust (#6906)
+				"default-case": "off",
+				// 'tsc' already handles this (
+				"no-dupe-class-members": "off"
+			}
+		}
+	],
+	"ignorePatterns": ["node_modules/", ".next/", "out/"],
+	"parserOptions": {
+		"project": "./tsconfig.json",
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true,
+			"modules": true,
+			"arrowFunctions": true,
+			"classes": true,
+			"defaultParams": true,
+			"destructuring": true,
+			"forOf": true,
+			"generators": false,
+			"objectLiteralComputedProperties": true,
+			"objectLiteralDuplicateProperties": false,
+			"objectLiteralShorthandMethods": true,
+			"objectLiteralShorthandProperties": true,
+			"spread": true,
+			"superInFunctions": true,
+			"templateStrings": true
+		}
+	}
 }
