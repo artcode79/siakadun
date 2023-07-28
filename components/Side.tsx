@@ -28,6 +28,11 @@ const navItems = [
 		link: '/mahasiswa',
 		icon: () => <PeopleAltOutlined />,
 	},
+	{
+		name: 'Fakultas',
+		link: '/fakultas',
+		icon: () => <PeopleAltOutlined />,
+	},
 ]
 
 const navItems2 = [
