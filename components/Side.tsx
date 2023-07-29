@@ -33,6 +33,11 @@ const navItems = [
 		link: '/fakultas',
 		icon: () => <PeopleAltOutlined />,
 	},
+	{
+		name: 'Jurusan',
+		link: '/jurusan',
+		icon: () => <PeopleAltOutlined />,
+	},
 ]
 
 const navItems2 = [

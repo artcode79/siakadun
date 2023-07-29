@@ -1,8 +1,15 @@
 // ini adalah halaman add mahasiswa
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { db } from '~/libs/firebase'
-import { addDoc, collection, doc, getDocs, setDoc } from 'firebase/firestore'
+import {
+	addDoc,
+	collection,
+	doc,
+	getDoc,
+	getDocs,
+	setDoc,
+} from 'firebase/firestore'
 import {
 	Button,
 	Box,
@@ -36,6 +43,9 @@ const Add = () => {
 	const [akta_kelahiran, setAkta_kelahiran] = useState('')
 	const [ktp, setKtp] = useState('')
 	const [fakultas_id, setFakultas_id] = useState('')
+
+	const [fakultas, setFakultas] = useState<any[]>([])
+
 	const [jurusan_id, setJurusan_id] = useState('')
 	const [email, setEmail] = useState('')
 	const [no_hp, setNo_hp] = useState('')
@@ -46,32 +56,6 @@ const Add = () => {
 	const [error, setError] = useState(false)
 	const [jurusans, setJurusans] = useState<any[]>([])
 
-	const getJurusans = async () => {
-		const jurusanRef = collection(db, 'jurusan')
-		const querySnapshot = await getDocs(jurusanRef)
-		const jurusans: any[] = []
-		querySnapshot.forEach(doc => {
-			jurusans.push({
-				id: doc.id,
-				nama: doc.data().nama,
-			})
-		})
-		setJurusans(jurusans)
-	}
-	const getFakultas = async () => {
-		const fakultasRef = collection(db, 'fakultas')
-		const querySnapshot = await getDocs(fakultasRef)
-		const fakultas: any[] = []
-		querySnapshot.forEach(doc => {
-			fakultas.push({
-				id: doc.id,
-				nama: doc.data().nama,
-			})
-		})
-		setJurusans(fakultas)
-	}
-	 
-
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		const docRef = await addDoc(collection(db, 'mahasiswa'), {
@@ -79,6 +63,7 @@ const Add = () => {
 			nama: nama,
 			alamat: alamat,
 			jurusan: jurusans,
+
 			email: email,
 			no_hp: no_hp,
 		})
@@ -92,6 +77,8 @@ const Add = () => {
 		})
 		window.location.replace('/mahasiswa')
 	}
+
+	useEffect(() => {}, [])
 
 	return (
 		<>
@@ -152,6 +139,23 @@ const Add = () => {
 									),
 								}}
 							/>
+							<FormControl fullWidth sx={{ mb: 2 }}>
+								<InputLabel id="demo-simple-select-label">Fakultas</InputLabel>
+								<Select
+									labelId="demo-simple-select-label"
+									id="demo-simple-select"
+									value={fakultas_id}
+									label="Fakultas"
+									onChange={e => setFakultas_id(e.target.value)}
+								>
+									{fakultas.map((fakultas, index) => (
+										<MenuItem key={index} value={fakultas.id}>
+											{fakultas.nama}
+											{/* <FormHelperText>Some important helper text</FormHelperText> */}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
 							<Button type="submit" variant="contained" fullWidth>
 								Submit
 							</Button>
