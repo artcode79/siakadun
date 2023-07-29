@@ -8,7 +8,9 @@ import {
 	doc,
 	getDoc,
 	getDocs,
+	query,
 	setDoc,
+	where,
 } from 'firebase/firestore'
 import {
 	Button,
@@ -43,9 +45,7 @@ const Add = () => {
 	const [akta_kelahiran, setAkta_kelahiran] = useState('')
 	const [ktp, setKtp] = useState('')
 	const [fakultas_id, setFakultas_id] = useState('')
-
 	const [fakultas, setFakultas] = useState<any[]>([])
-
 	const [jurusan_id, setJurusan_id] = useState('')
 	const [email, setEmail] = useState('')
 	const [no_hp, setNo_hp] = useState('')
@@ -54,7 +54,7 @@ const Add = () => {
 	const [foto_akta_kelahiran, setFoto_akta_kelahiran] = useState('')
 	const [mahasiswa_id, setMahasiswa_id] = useState('')
 	const [error, setError] = useState(false)
-	const [jurusans, setJurusans] = useState<any[]>([])
+	const [jurusan, setJurusan] = useState<any[]>([])
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -62,23 +62,51 @@ const Add = () => {
 			nim: '21' + Math.random() + 10000,
 			nama: nama,
 			alamat: alamat,
-			jurusan: jurusans,
-
+			jurusan: jurusan_id,
 			email: email,
 			no_hp: no_hp,
 		})
 
 		await setDoc(doc(db, 'mahasiswa', docRef.id), {
+			nim: nim,
 			nama: nama,
 			alamat: alamat,
-			jurusan: jurusans,
+			jurusan: jurusan_id,
 			email: email,
 			no_hp: no_hp,
 		})
 		window.location.replace('/mahasiswa')
 	}
 
-	useEffect(() => {}, [])
+	useEffect(() => {
+		const fetchFakultas = async () => {
+			const data = await getDocs(collection(db, 'fakultas'))
+			const dataFakultas: any[] = []
+			data.forEach((doc: any) => {
+				dataFakultas.push({
+					id: doc.id,
+					...doc.data(),
+				})
+			})
+			setFakultas(dataFakultas)
+		}
+		fetchFakultas()
+
+		const fetchJurusan = async () => {
+			const q = query(collection(db, 'jurusan'))
+			const data = await getDocs(q)
+			const dataJurusan: any[] = []
+			data.forEach((doc: any) => {
+				dataJurusan.push({
+					id: doc.id,
+					...doc.data(),
+				})
+			})
+			setJurusan(dataJurusan)
+		}
+
+		fetchJurusan()
+	}, [fakultas, fakultas_id, jurusan])
 
 	return (
 		<>
@@ -149,9 +177,36 @@ const Add = () => {
 									onChange={e => setFakultas_id(e.target.value)}
 								>
 									{fakultas.map((fakultas, index) => (
-										<MenuItem key={index} value={fakultas.id}>
+										<MenuItem
+											key={index}
+											value={fakultas.id}
+											sx={{ mb: 2, textTransform: 'uppercase' }}
+										>
 											{fakultas.nama}
-											{/* <FormHelperText>Some important helper text</FormHelperText> */}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+
+							<FormControl fullWidth sx={{ mb: 2 }}>
+								<InputLabel id="demo-simple-select-label">Jurusan</InputLabel>
+								<Select
+									labelId="demo-simple-select-label"
+									id="demo-simple-select"
+									value={jurusan_id}
+									label="Jurusan"
+									onChange={e => setJurusan_id(e.target.value)}
+								>
+									{jurusan.map((jurusan, index) => (
+										<MenuItem
+											key={index}
+											value={jurusan.id}
+											sx={{ mb: 2, textTransform: 'uppercase' }}
+										>
+											{jurusan.nama}
+											<FormHelperText sx={{ ml: 1 }}>
+												{jurusan.fakultas.nama}
+											</FormHelperText>
 										</MenuItem>
 									))}
 								</Select>
@@ -168,3 +223,9 @@ const Add = () => {
 }
 
 export default Add
+
+function orderBy(
+	arg0: string
+): import('@firebase/firestore').QueryCompositeFilterConstraint {
+	throw new Error('Function not implemented.')
+}
