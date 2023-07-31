@@ -17,8 +17,8 @@ const Dashboard = () => {
 						<Typography variant="body1" component="p">
 							This is where you can view and manage your projects.
 						</Typography>
-						<Button variant="contained" color="primary" href="/projects">
-							View Projects
+						<Button variant="contained" color="primary" href="/mahasiswa">
+							Mahasiswa
 						</Button>
 					</Paper>
 				</Box>
