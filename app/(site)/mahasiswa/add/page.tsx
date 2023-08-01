@@ -3,17 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, storage } from '~/libs/firebase'
-import {
-	addDoc,
-	collection,
-	doc,
-	getDoc,
-	getDocs,
-	query,
-	setDoc,
-	where,
-} from 'firebase/firestore'
-import { ref, uploadBytes } from 'firebase/storage'
+import { addDoc, collection, getDocs, query } from 'firebase/firestore'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import {
 	Button,
 	Box,
@@ -22,18 +13,17 @@ import {
 	Container,
 	Paper,
 	InputAdornment,
-	IconButton,
 	FormHelperText,
-	FormLabel,
 	FormControl,
 	InputLabel,
-	OutlinedInput,
 	Select,
 	MenuItem,
 	Grid,
 	Divider,
 	LinearProgress,
+	Alert,
 } from '@mui/material'
+import * as yup from 'yup'
 
 const Add = () => {
 	const [nim, setNim] = useState('')
@@ -62,42 +52,75 @@ const Add = () => {
 	const [success, setSuccess] = useState(false)
 	const [jurusan, setJurusan] = useState<any[]>([])
 	const router = useRouter()
+	const [file, setFile] = useState<any>(null)
+	const [file_ktp, setFile_ktp] = useState<any>(null)
+	const [file_akta_kelahiran, setFile_akta_kelahiran] = useState<any>(null)
+
+	const schema = yup.object({
+		nim: yup.string().required('NIM harus diisi'),
+		nama: yup.string().required('Nama harus diisi'),
+		alamat: yup.string().required('Alamat harus diisi'),
+		desa: yup.string().required('Desa harus diisi'),
+		kecamatan: yup.string().required('Kecamatan harus diisi'),
+		kabupaten: yup.string().required('Kabupaten harus diisi'),
+		provinsi: yup.string().required('Provinsi harus diisi'),
+		sma: yup.string().required('SMA harus diisi'),
+		no_ijazah: yup.string().required('No Ijazah harus diisi'),
+		no_skhun: yup.string().required('No SKHUN harus diisi'),
+		kk: yup.string().required('Kartu Keluarga harus diisi'),
+		ktp: yup.string(),
+		email: yup
+			.string()
+			.email('Email tidak valid')
+			.required('Email harus diisi'),
+		no_hp: yup.string().required('No HP harus diisi'),
+		//  ini adalah kondisi jika foto tidak diisi, jpg jpeg png
+		foto: yup
+			.string()
+			.matches(
+				/^.+\.(jpg|jpeg|png)$/i,
+				'File harus berupa gambar (jpg, jpeg, png,	tidak boleh lebih dari 5MB)'
+			)
+			.max(
+				5000000,
+				'File harus berupa gambar (jpg, jpeg, png,	tidak boleh lebih dari 5MB)'
+			),
+		foto_ktp: yup
+			.string()
+			.matches(
+				/^.+\.(jpg|jpeg|png|pdf|)$/i,
+				'File harus berupa gambar (jpg, jpeg, png,	tidak boleh lebih dari 5MB)'
+			)
+			.max(5000000),
+
+		foto_akta_kelahiran: yup.string().matches(/^.+\.(jpg|jpeg|png|pdf|)$/i),
+	}) // ini adalah validasi inputan
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		const data = {
-			nim: Math.floor(Math.random() * 34 + 1000000).toString(16),
-			nama,
-			alamat,
-			desa,
-			kecamatan,
-			kabupaten,
-			provinsi,
-			sma,
-			no_ijazah,
-			no_skhun,
-			ktp,
-			fakultas_id,
-			jurusan_id,
-			email,
-			no_hp,
-			foto,
-			foto_ktp,
-			foto_akta_kelahiran,
-		}
+		
+		try {
+		
+			setError(false)
+			setLoading(true)
+			const storageRef = ref(storage, `foto/${foto}`)
+			const storageRef_ktp = ref(storage, `foto//${foto_ktp}`)
+			const storageRef_akta_kelahiran = ref(
+				storage,
+				`foto/akte/${foto_akta_kelahiran}`
+			)
+			await uploadBytes(storageRef, file)
+			await uploadBytes(storageRef_akta_kelahiran, file_akta_kelahiran)
+			await uploadBytes(storageRef_ktp, file_ktp)
+		 
+			const data ={
+				 
+			}
 
-		const docRef = await addDoc(collection(db, 'mahasiswa'), data)
+			     
+			
+		
 
-		setSuccess(true)
-		setMessage('Data berhasil ditambahkan')
-
-		if (success) {
-			setTimeout(() => {
-				router.push('/mahasiswa')
-			}, 2000)
-		} else {
-			setError(true)
-			setMessage('Data gagal ditambahkan')
 		}
 	}
 
@@ -134,23 +157,8 @@ const Add = () => {
 		}
 
 		fetchJurusan()
-		setLoading(true)
+		setLoading(false)
 	}, [])
-	// upload foto dan simpan direktori local
-	const uploadFoto = async (e: any) => {
-		const file = e.target.files[0]
-		const storageRef = ref(storage, `mahasiswa/${file.name}`)
-		await uploadBytes(storageRef, file)
-			.then(() => {
-				setFoto(file.name)
-
-				setMessage('Foto berhasil diupload')
-			})
-			.catch((err: any) => {
-				setMessage('Foto gagal diupload')
-				setError(true)
-			})
-	}
 
 	return (
 		<>
@@ -161,59 +169,43 @@ const Add = () => {
 							Tambah Data Mahasiswa
 						</Typography>
 						<Divider />
-						{success && (
-							<Box
-								sx={{
-									p: 2,
-									mt: 2,
-									mb: 2,
-									backgroundColor: 'green',
-									color: 'white',
-									fontWeight: 'bold',
-									borderRadius: '5px',
-								}}
-								component="div"
-								role="alert"
-								aria-live="assertive"
-								aria-atomic="true"
-								aria-labelledby="alert-dialog-title"
-								aria-describedby="alert-dialog-description"
-							>
-								<Typography variant="h6" component="h2" gutterBottom>
-									{message}
-								</Typography>
-							</Box>
-						)}
-						{error && (
-							<Box
-								sx={{
-									p: 2,
-									mt: 2,
-									mb: 2,
-									backgroundColor: 'red',
-									color: 'white',
-									fontWeight: 'bold',
-									borderRadius: '5px',
-									background: '#ff000033',
-								}}
-								component="div"
-								role="alert"
-								aria-live="assertive"
-								aria-atomic="true"
-								aria-labelledby="alert-dialog-title"
-								aria-describedby="alert-dialog-description"
-							>
-								<Typography variant="h6" component="h2" gutterBottom>
-									{message}
-								</Typography>
-							</Box>
-						)}
 						<Box
 							component="form"
 							onSubmit={handleSubmit}
 							noValidate
 							autoComplete="off"
 						>
+							{loading ? (
+								<LinearProgress color="secondary" />
+							) : (
+								<>
+									{error ? (
+										<Alert
+											sx={{
+												mb: 2,
+												bgcolor: '#FF3737',
+												color: '#FFFFFF',
+												borderRadius: '5px',
+												boxShadow: '0px 0px 10px #ff0000',
+												transition: 'all 0.5s ease-in-out',
+											}}
+											severity="error"
+										>
+											{message}
+										</Alert>
+									) : (
+										<>
+											{success ? (
+												<Alert severity="success" sx={{ mb: 2 }}>
+													{message}
+												</Alert>
+											) : (
+												<></>
+											)}
+										</>
+									)}
+								</>
+							)}
 							<Grid container spacing={4}>
 								<Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
 									<TextField
@@ -318,11 +310,7 @@ const Add = () => {
 										>
 											{loading ? (
 												<>
-													<LinearProgress
-														color="secondary"
-														size={100}
-														sx={{ mb: 2 }}
-													/>
+													<LinearProgress color="secondary" sx={{ mb: 2 }} />
 												</>
 											) : (
 												<></>
@@ -421,45 +409,46 @@ const Add = () => {
 										required
 									/>
 								</Grid>
-								<Divider sx={{ borderColor: '#080808' }} />
+
 								<Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
-									<FormLabel component="legend">Upload Foto</FormLabel>
 									<TextField
+										value={file}
+										onChange={(e: any) => setFile(e.target.value)}
+										variant="outlined"
+										fullWidth
 										id="foto"
+										label="Upload Foto"
+										name="foto"
 										type="file"
-										variant="outlined"
-										value={foto}
-										onChange={e => [setFoto(e.target.value), uploadFoto]}
-										fullWidth
 										required
-										sx={{ mt: 2 }}
+										sx={{ mb: 2 }}
 									/>
-								</Grid>
-								<Grid item xs={6} sm={6} md={6} lg={6} xl={6} sx={{ mt: 2 }}>
-									<FormLabel component="legend">
-										Upload Foto Akta Kelahiran
-									</FormLabel>
+
 									<TextField
-										id="foto_akta_kelahiran"
-										type="file"
+										value={file_akta_kelahiran}
+										onChange={(e: any) =>
+											setFile_akta_kelahiran(e.target.value)
+										}
 										variant="outlined"
-										value={foto_akta_kelahiran}
-										onChange={e => setFoto_akta_kelahiran(e.target.value)}
 										fullWidth
+										id="foto"
+										label="Upload Akta Kelahiran"
+										name="foto"
+										type="file"
 										required
+										sx={{ mb: 2 }}
 									/>
 								</Grid>
 								<Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
-									<FormLabel component="legend">Upload Foto KTP</FormLabel>
 									<TextField
-										id="foto_ktp"
-										type="file"
+										value={file_ktp}
+										onChange={(e: any) => setFile_ktp(e.target.value)}
 										variant="outlined"
-										value={foto_ktp}
-										onChange={e => setFoto_ktp(e.target.value)}
+										name="foto"
+										type="file"
 										fullWidth
-										required
-										sx={{ mt: 2 }}
+										id="foto"
+										label="Upload Foto KTP"
 									/>
 								</Grid>
 							</Grid>

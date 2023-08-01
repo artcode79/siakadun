@@ -27,8 +27,8 @@ import {
 	Paper,
 	Alert,
 } from '@mui/material'
-import { type } from 'os'
 import { Delete } from '@mui/icons-material'
+import Link from 'next/link'
 
 const Mahasiswa = () => {
 	const [mahasiswa, setMahasiswa] = useState<any[]>([])
@@ -122,6 +122,8 @@ const Mahasiswa = () => {
 							<Table sx={{ color: '#fff' }}>
 								<TableHead sx={{ fontSize: '0.8rem' }}>
 									<TableRow>
+										<TableCell>No</TableCell>
+
 										<TableCell>Nama</TableCell>
 										<TableCell>NIM</TableCell>
 										<TableCell>Jurusan</TableCell>
@@ -130,11 +132,25 @@ const Mahasiswa = () => {
 								</TableHead>
 								<TableBody sx={{ fontSize: '0.8rem' }}>
 									{/*menggunakan map untuk mengambil data dari firebase*/}
-									{mahasiswa.map(mahasiswa => (
+									{mahasiswa.map((mahasiswa, index) => (
 										<TableRow key={mahasiswa.id}>
-											<TableCell>{mahasiswa.nama}</TableCell>
+											<TableCell>{index + 1}</TableCell>
+											<TableCell>
+												<Link
+													style={{
+														textDecoration: 'none',
+														color: '#000',
+														cursor: 'pointer',
+													}}
+													href={`/mahasiswa/${mahasiswa.id}`}
+												>
+													{mahasiswa.nama}
+												</Link>
+											</TableCell>
 											<TableCell>{mahasiswa.nim}</TableCell>
-											<TableCell>{mahasiswa.jurusan_id}</TableCell>
+											<TableCell>
+												{mahasiswa.jurusan_id} - {mahasiswa.fakultas_id}
+											</TableCell>
 											<TableCell>
 												<Button
 													variant="contained"
