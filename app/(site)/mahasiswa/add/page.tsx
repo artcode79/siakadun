@@ -1,6 +1,6 @@
 // ini adalah halaman add mahasiswa
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, storage } from '~/libs/firebase'
 import { addDoc, collection, getDocs, query } from 'firebase/firestore'
@@ -13,17 +13,12 @@ import {
 	Container,
 	Paper,
 	InputAdornment,
-	FormHelperText,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
 	Grid,
 	Divider,
 	LinearProgress,
 	Alert,
 } from '@mui/material'
-import * as yup from 'yup'
+import Upload from '~/components/Upload'
 
 const Add = () => {
 	const [nim, setNim] = useState('')
@@ -56,71 +51,62 @@ const Add = () => {
 	const [file_ktp, setFile_ktp] = useState<any>(null)
 	const [file_akta_kelahiran, setFile_akta_kelahiran] = useState<any>(null)
 
-	const schema = yup.object({
-		nim: yup.string().required('NIM harus diisi'),
-		nama: yup.string().required('Nama harus diisi'),
-		alamat: yup.string().required('Alamat harus diisi'),
-		desa: yup.string().required('Desa harus diisi'),
-		kecamatan: yup.string().required('Kecamatan harus diisi'),
-		kabupaten: yup.string().required('Kabupaten harus diisi'),
-		provinsi: yup.string().required('Provinsi harus diisi'),
-		sma: yup.string().required('SMA harus diisi'),
-		no_ijazah: yup.string().required('No Ijazah harus diisi'),
-		no_skhun: yup.string().required('No SKHUN harus diisi'),
-		kk: yup.string().required('Kartu Keluarga harus diisi'),
-		ktp: yup.string(),
-		email: yup
-			.string()
-			.email('Email tidak valid')
-			.required('Email harus diisi'),
-		no_hp: yup.string().required('No HP harus diisi'),
-		//  ini adalah kondisi jika foto tidak diisi, jpg jpeg png
-		foto: yup
-			.string()
-			.matches(
-				/^.+\.(jpg|jpeg|png)$/i,
-				'File harus berupa gambar (jpg, jpeg, png,	tidak boleh lebih dari 5MB)'
-			)
-			.max(
-				5000000,
-				'File harus berupa gambar (jpg, jpeg, png,	tidak boleh lebih dari 5MB)'
-			),
-		foto_ktp: yup
-			.string()
-			.matches(
-				/^.+\.(jpg|jpeg|png|pdf|)$/i,
-				'File harus berupa gambar (jpg, jpeg, png,	tidak boleh lebih dari 5MB)'
-			)
-			.max(5000000),
-
-		foto_akta_kelahiran: yup.string().matches(/^.+\.(jpg|jpeg|png|pdf|)$/i),
-	}) // ini adalah validasi inputan
-
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		
+
 		try {
-		
 			setError(false)
-			setLoading(true)
-			const storageRef = ref(storage, `foto/${foto}`)
-			const storageRef_ktp = ref(storage, `foto//${foto_ktp}`)
-			const storageRef_akta_kelahiran = ref(
-				storage,
-				`foto/akte/${foto_akta_kelahiran}`
-			)
-			await uploadBytes(storageRef, file)
-			await uploadBytes(storageRef_akta_kelahiran, file_akta_kelahiran)
-			await uploadBytes(storageRef_ktp, file_ktp)
-		 
-			const data ={
-				 
+
+			// ini adalah kondisi jika foto tidak diisi, jpg jpeg png
+			if (file) {
+				const storageRef = ref(storage, `mahasiswa/${file.name}`)
+				await uploadBytes(storageRef, file)
+				const url = await getDownloadURL(storageRef)
+				setFoto(url)
 			}
 
-			     
-			
-		
+			// ini adalah kondisi jika foto tidak diisi, jpg jpeg png
+			if (file_ktp) {
+				const storageRef = ref(storage, `mahasiswa/${file_ktp.name}`)
 
+				const url = await getDownloadURL(storageRef)
+				setFoto_ktp(url)
+			}
+
+			// ini adalah kondisi jika foto tidak diisi, jpg jpeg png
+			if (file_akta_kelahiran) {
+				const storageRef = ref(storage, `mahasiswa/${file_akta_kelahiran.name}`)
+				await uploadBytes(storageRef, file_akta_kelahiran)
+				const url = await getDownloadURL(storageRef)
+				setFoto_akta_kelahiran(url)
+			}
+
+			const data = {
+				nim: Math.floor(Math.random() + 1000000).toString(17),
+				nama: nama,
+				alamat: alamat,
+				desa: desa,
+				kecamatan: kecamatan,
+				kabupaten: kabupaten,
+				provinsi: provinsi,
+				sma: sma,
+				no_ijazah: no_ijazah,
+				no_skhun: no_skhun,
+				kk: kk,
+				ktp: ktp,
+				email: email,
+				no_hp: no_hp,
+				//  ini adalah kondisi jika foto tidak diisi, jpg jpeg png
+				foto: foto,
+				foto_ktp: foto_ktp,
+				foto_akta_kelahiran: foto_akta_kelahiran,
+			}
+
+			await addDoc(collection(db, 'mahasiswa'), data)
+			setSuccess(true)
+		} catch {
+			setError(true)
+			setMessage('Terjadi kesalahan, silahkan coba lagi')
 		}
 	}
 
@@ -169,12 +155,7 @@ const Add = () => {
 							Tambah Data Mahasiswa
 						</Typography>
 						<Divider />
-						<Box
-							component="form"
-							onSubmit={handleSubmit}
-							noValidate
-							autoComplete="off"
-						>
+						<form onSubmit={handleSubmit} noValidate autoComplete="off">
 							{loading ? (
 								<LinearProgress color="secondary" />
 							) : (
@@ -297,60 +278,14 @@ const Add = () => {
 									/>
 								</Grid>
 								<Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
-									<FormControl fullWidth sx={{ mb: 2 }}>
-										<InputLabel id="demo-simple-select-label">
-											Fakultas
-										</InputLabel>
-										<Select
-											labelId="demo-simple-select-label"
-											id="demo-simple-select"
-											value={fakultas_id}
-											label="Fakultas"
-											onChange={e => setFakultas_id(e.target.value)}
-										>
-											{loading ? (
-												<>
-													<LinearProgress color="secondary" sx={{ mb: 2 }} />
-												</>
-											) : (
-												<></>
-											)}
-											{fakultas.map((fakultas, index) => (
-												<MenuItem
-													key={index}
-													value={fakultas.nama}
-													sx={{ mb: 2, textTransform: 'uppercase' }}
-												>
-													{fakultas.nama}
-												</MenuItem>
-											))}
-										</Select>
-									</FormControl>
-									<FormControl fullWidth sx={{ mb: 2 }}>
-										<InputLabel id="demo-simple-select-label">
-											Jurusan
-										</InputLabel>
-										<Select
-											labelId="demo-simple-select-label"
-											id="demo-simple-select"
-											value={jurusan_id}
-											label="Jurusan"
-											onChange={e => setJurusan_id(e.target.value)}
-										>
-											{jurusan.map((jurusan, index) => (
-												<MenuItem
-													key={index}
-													value={jurusan.nama}
-													sx={{ mb: 2, textTransform: 'uppercase' }}
-												>
-													{jurusan.nama}
-													<FormHelperText sx={{ ml: 1 }}>
-														{jurusan.fakultas.nama}
-													</FormHelperText>
-												</MenuItem>
-											))}
-										</Select>
-									</FormControl>
+									<Upload
+										fakultas_id={fakultas_id}
+										setFakultas_id={setFakultas_id}
+										jurusan_id={jurusan_id}
+										setJurusan_id={setJurusan_id}
+										fakultas={fakultas}
+										jurusan={jurusan}
+									/>
 									<TextField
 										id="sma"
 										label="SMA"
@@ -467,7 +402,7 @@ const Add = () => {
 									Cancle
 								</Button>
 							</Box>
-						</Box>
+						</form>
 					</Paper>
 				</Container>
 			</Box>

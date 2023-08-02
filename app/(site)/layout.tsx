@@ -1,11 +1,14 @@
 'use client'
 import React from 'react'
 import Side from '../../components/Side'
+import AuthProvider from '~/components/AuthProvider'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<>
-			<Side>{children}</Side>
+			<AuthProvider>
+				<Side>{children}</Side>
+			</AuthProvider>
 		</>
 	)
 }
