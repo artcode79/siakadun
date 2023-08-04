@@ -1,6 +1,8 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { useRouter } from 'next/navigation'
+import { Box, Button, TextField, Paper, Typography, Alert } from '@mui/material'
 import { auth } from '~/libs/firebase'
 
 const Register = () => {
@@ -8,6 +10,8 @@ const Register = () => {
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [error, setError] = useState('')
+	const [message, setMessage] = useState('')
+	const router = useRouter()
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -23,9 +27,11 @@ const Register = () => {
 				password
 			)
 			console.log(user)
+			setMessage('Akun berhasil dibuat, silahkan login')
+			router.push('/login')
 		} catch (err: any) {
 			console.log(err)
-			setError(err.message)
+			setError('Akun dengan email tersebut sudah terdaftar')
 		}
 	}
 
@@ -34,35 +40,96 @@ const Register = () => {
 	}, [email, password, confirmPassword])
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen py-2">
-			<form className="w-1/3" onSubmit={handleSubmit}>
-				<input
-					type="email"
-					className="border-2 border-gray-300 p-2 rounded-lg"
-					placeholder="Email"
-					value={email}
-					onChange={e => setEmail(e.target.value)}
-				/>
-				<input
-					type="password"
-					className="border-2 border-gray-300 p-2 rounded-lg"
-					placeholder="Password"
-					value={password}
-					onChange={e => setPassword(e.target.value)}
-				/>
-				<input
-					type="password"
-					className="border-2 border-gray-300 p-2 rounded-lg"
-					placeholder="Confirm Password"
-					value={confirmPassword}
-					onChange={e => setConfirmPassword(e.target.value)}
-				/>
-				<button type="submit" disabled={!email || !password}>
-					Register
-				</button>
-			</form>
-			{error && <p className="text-red-500">{error}</p>}
-		</div>
+		<>
+			<Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+				<Paper sx={{ p: 5 }}>
+					{error && (
+						<Alert severity="error" sx={{ mb: 2 }}>
+							<Typography
+								variant="body2"
+								color="error"
+								align="center"
+								gutterBottom
+							>
+								{error}
+							</Typography>
+						</Alert>
+					)}
+					{message && (
+						<Alert severity="success" sx={{ mb: 2 }}>
+							<Typography
+								variant="body2"
+								color="success"
+								align="center"
+								gutterBottom
+							>
+								{message}
+							</Typography>
+						</Alert>
+					)}
+					<Typography variant="h4" component="h1" align="center" gutterBottom>
+						Register
+					</Typography>
+					<Box
+						component="form"
+						onSubmit={handleSubmit}
+						sx={{ width: '100%', my: 4 }}
+					>
+						<TextField
+							type="email"
+							label="Email"
+							value={email}
+							sx={{ mb: 2 }}
+							onChange={e => setEmail(e.target.value)}
+							fullWidth
+							size="small"
+							required
+						/>
+						<TextField
+							type="password"
+							label="Password"
+							value={password}
+							sx={{ mb: 2 }}
+							onChange={e => setPassword(e.target.value)}
+							fullWidth
+							size="small"
+							required
+						/>
+						<TextField
+							type="password"
+							label="Confirm Password"
+							value={confirmPassword}
+							onChange={e => setConfirmPassword(e.target.value)}
+							fullWidth
+							sx={{ mb: 2 }}
+							size="small"
+							required
+						/>
+						<Button type="submit" variant="contained" sx={{ mt: 2 }} fullWidth>
+							Register
+						</Button>
+					</Box>
+					<Box sx={{ display: 'flex', justifyContent: 'center' }}>
+						<Typography variant="body2" color="text.secondary" gutterBottom>
+							Already have an account?
+							<Button
+								variant="text"
+								onClick={() => router.push('/login')}
+								sx={{
+									mr: 1,
+									'&:hover': {
+										backgroundColor: 'transparent',
+										color: '#f44336',
+									},
+								}}
+							>
+								Login
+							</Button>
+						</Typography>
+					</Box>
+				</Paper>
+			</Box>
+		</>
 	)
 }
 

@@ -4,7 +4,12 @@ import React, { useState, useEffect, Fragment } from 'react'
 import { useRouter } from 'next/navigation'
 import { db, storage } from '~/libs/firebase'
 import { addDoc, collection, getDocs, query } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import {
+	ref,
+	uploadBytes,
+	getDownloadURL,
+	StorageReference,
+} from 'firebase/storage'
 import {
 	Button,
 	Box,
@@ -50,36 +55,15 @@ const Add = () => {
 	const [file, setFile] = useState<any>(null)
 	const [file_ktp, setFile_ktp] = useState<any>(null)
 	const [file_akta_kelahiran, setFile_akta_kelahiran] = useState<any>(null)
+	const [progress, setProgress] = useState(0)
+	const [uploading, setUploading] = useState(false)
+	const [keuangan, setKeuangan] = useState(0)
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 
 		try {
 			setError(false)
-
-			// ini adalah kondisi jika foto tidak diisi, jpg jpeg png
-			if (file) {
-				const storageRef = ref(storage, `mahasiswa/${file.name}`)
-				await uploadBytes(storageRef, file)
-				const url = await getDownloadURL(storageRef)
-				setFoto(url)
-			}
-
-			// ini adalah kondisi jika foto tidak diisi, jpg jpeg png
-			if (file_ktp) {
-				const storageRef = ref(storage, `mahasiswa/${file_ktp.name}`)
-
-				const url = await getDownloadURL(storageRef)
-				setFoto_ktp(url)
-			}
-
-			// ini adalah kondisi jika foto tidak diisi, jpg jpeg png
-			if (file_akta_kelahiran) {
-				const storageRef = ref(storage, `mahasiswa/${file_akta_kelahiran.name}`)
-				await uploadBytes(storageRef, file_akta_kelahiran)
-				const url = await getDownloadURL(storageRef)
-				setFoto_akta_kelahiran(url)
-			}
 
 			const data = {
 				nim: Math.floor(Math.random() + 1000000).toString(17),
@@ -100,6 +84,9 @@ const Add = () => {
 				foto: foto,
 				foto_ktp: foto_ktp,
 				foto_akta_kelahiran: foto_akta_kelahiran,
+				keuangan: Math.floor(
+					Math.random() * (1000000 - 50000) + 50000
+				).toString(16),
 			}
 
 			await addDoc(collection(db, 'mahasiswa'), data)
@@ -145,6 +132,21 @@ const Add = () => {
 		fetchJurusan()
 		setLoading(false)
 	}, [])
+
+	useEffect(() => {
+		const uploadFoto = async () => {
+			if (file) {
+				const storageRef: StorageReference = ref(storage, `foto/${file.name}`)
+				await uploadBytes(storageRef, file)
+				const url = await getDownloadURL(storageRef)
+				setFoto(url)
+			}
+		}
+
+		uploadFoto()
+
+		uploadFoto()
+	}, [file])
 
 	return (
 		<>

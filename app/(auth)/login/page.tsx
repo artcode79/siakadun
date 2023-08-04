@@ -10,6 +10,7 @@ import {
 	Typography,
 	TextField,
 	Paper,
+	Alert,
 } from '@mui/material'
 import { auth } from '~/libs/firebase'
 
@@ -17,16 +18,21 @@ const Login = () => {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [Loading, setLoading] = useState(false)
+	const [error, setError] = useState('')
 	const router = useRouter()
 
 	const log = async (e: any) => {
 		e.preventDefault()
 		console.log(email, password)
-		await signInWithEmailAndPassword(auth, email, password).then(() => {
-			setLoading(false)
-
-			router.push('/dashboard')
-		})
+		await signInWithEmailAndPassword(auth, email, password)
+			.then(() => {
+				setLoading(true)
+				router.push('/dashboard')
+			})
+			.catch(err => {
+				setLoading(false)
+				setError(err.message)
+			})
 	}
 
 	return (
@@ -34,6 +40,14 @@ const Login = () => {
 			<Container maxWidth="sm">
 				<Paper elevation={3} sx={{ p: 5, mt: 5 }}>
 					{Loading ? 'Loading...' : null}
+
+					{error ? (
+						<Alert severity="error" sx={{ mb: 2 }}>
+							<Typography variant="h6" color="error">
+								{error}
+							</Typography>
+						</Alert>
+					) : null}
 					<Box
 						sx={{
 							display: 'flex',
@@ -78,6 +92,21 @@ const Login = () => {
 								Login
 							</Button>
 						</Box>
+						<Grid container>
+							<Grid item xs>
+								<Typography component="div" gutterBottom>
+									Belum punya akun?
+									<Button
+										onClick={() => router.push('/register')}
+										variant="text"
+										size="small"
+									>
+										{' '}
+										Daftar
+									</Button>
+								</Typography>
+							</Grid>
+						</Grid>
 					</Box>
 				</Paper>
 			</Container>

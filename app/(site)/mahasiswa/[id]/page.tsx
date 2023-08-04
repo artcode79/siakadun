@@ -24,7 +24,7 @@ interface Props {
 		id: string
 	}
 }
-const Show = ({ params }: Props) => {
+const Edit = ({ params }: Props) => {
 	const [data, setData] = useState<any>([])
 	const [image, setImage] = useState<any>([])
 	const [loading, setLoading] = useState<boolean>(false)
@@ -164,4 +164,4 @@ const Show = ({ params }: Props) => {
 	)
 }
 
-export default Show
+export default Edit

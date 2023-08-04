@@ -67,7 +67,7 @@ export default function Side({ children }: { children: React.ReactNode }) {
 		{
 			name: 'User',
 			onclick: () => {
-				router.push('/user')
+				router.push('/users')
 			},
 			icon: () => <PeopleSharp />,
 		},
