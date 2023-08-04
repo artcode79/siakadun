@@ -60,10 +60,7 @@ const Users = () => {
 		e.preventDefault()
 		// jika tidak ada user dalam database maka buatkan documen jika ada update doc tersebut
 		if (user) {
-			await updateProfile(auth.currentUser, {
-				displayName: name,
-				photoURL: photoURL,
-			})
+			
 			const docRef = doc(db, 'users', user.uid)
 			await setDoc(docRef, {
 				name: name,
