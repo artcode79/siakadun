@@ -17,29 +17,7 @@ const Keuangan: React.FC<KeuanganProps> = ({}) => {
 	const [error, setError] = useState(null)
 	const [data, setData] = useState(null)
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const q = query(
-					collection(db, 'keuangan'),
-					orderBy('createdAt', 'desc'),
-					limit(10)
-				)
-				const querySnapshot = await getDocs(q)
-				const data = querySnapshot.docs.map(doc => ({
-					id: doc.id,
-					...doc.data(),
-				}))
-				setData(data)
-				setLoading(false)
-			} catch (err) {
-				setError(err)
-				setLoading(false)
-			}
-		}
-		fetchData()
-	}, [])
-
+	
 	console.log(data)
 	console.log(error)
 	console.log(loading)
