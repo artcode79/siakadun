@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import {
 	Box,
 	Typography,
@@ -136,7 +137,15 @@ const Edit = ({ params }: Props) => {
 									style={{ width: '100px', height: '100px' }}
 								/>
 							) : (
-								<img src="https://via.placeholder.com/100" alt="foto" />
+								<Image
+									src="https://via.placeholder.com/100"
+									width={100}
+									height={100}
+									layout="responsive"
+									objectFit="cover"
+									objectPosition="center"
+									alt="foto"
+								/>
 							)}
 							{data.foto}
 						</Grid>
