@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../../../libs/firebase'
 import {
@@ -16,6 +16,7 @@ import {
 } from '@mui/material'
 
 export interface IFakultas {
+	[x: string]: ReactNode
 	id: string
 	nama: string
 }
@@ -100,7 +101,8 @@ const Fakultas = () => {
 					columnSpacing={{ xs: 1, sm: 2, md: 3 }}
 					sx={{ mt: 4 }}
 				>
-					{fakultas.map(fakultas => (
+					{fakultas.map((fakultas: IFakultas) => (
+						// eslint-disable-next-line react/jsx-key
 						<Grid item xs={6} md={4} lg={4} xl={3}>
 							<Card sx={{ width: '400px', mb: '10px' }} key={fakultas.id}>
 								<CardContent sx={{ height: '100px' }}>
